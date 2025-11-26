@@ -18,7 +18,9 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = "https://github.com/submoduler/submoduler"
   spec.metadata["changelog_uri"] = "https://github.com/submoduler/submoduler/blob/main/CHANGELOG.md"
 
-  spec.files = Dir["lib/**/*", "README.md", "LICENSE", "CHANGELOG.md"]
+  spec.files = Dir["lib/**/*", "bin/*", "README.md", "LICENSE", "CHANGELOG.md"]
+  spec.bindir = "bin"
+  spec.executables = ["submoduler_child"]
   spec.require_paths = ["lib"]
 
   # Runtime dependencies

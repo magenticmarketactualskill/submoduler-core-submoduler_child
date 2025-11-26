@@ -5,10 +5,12 @@ require 'optparse'
 module SubmodulerChild
   class CLI
     COMMANDS = {
+      'init' => 'Initialize a new Submoduler child submodule',
       'status' => 'Display status of the child submodule',
       'test' => 'Run tests in the child submodule',
       'version' => 'Display and manage version information',
-      'build' => 'Build the child submodule gem package'
+      'build' => 'Build the child submodule gem package',
+      'symlink_build' => 'Build symlinks from vendor gems to child .kiro/steering'
     }.freeze
 
     def self.run(args)
@@ -22,8 +24,6 @@ module SubmodulerChild
     end
 
     def run
-      verify_child_context
-
       if @args.empty?
         display_help
         return 1
@@ -37,6 +37,8 @@ module SubmodulerChild
         return 1
       end
 
+      verify_child_context
+
       execute_command
     rescue StandardError => e
       puts "Error: #{e.message}"
@@ -46,6 +48,9 @@ module SubmodulerChild
     private
 
     def verify_child_context
+      # Skip verification for init command
+      return if @command == 'init'
+      
       config_file = '.submoduler.ini'
       
       unless File.exist?(config_file)
@@ -61,12 +66,19 @@ module SubmodulerChild
 
     def execute_command
       case @command
+      when 'init'
+        require_relative 'init_command'
+        InitCommand.new(@args).execute
       when 'status'
         StatusCommand.new(@args).execute
       when 'test'
         TestCommand.new(@args).execute
       when 'version'
         VersionCommand.new(@args).execute
+      when 'symlink_build'
+        require_relative 'symlink_build_command'
+        SymlinkBuildCommand.run
+        0
       when 'build'
         puts "Build command not yet implemented"
         0
