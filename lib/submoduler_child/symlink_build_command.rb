@@ -27,14 +27,12 @@ module SubmodulerChild
     end
 
     def find_parent_path
-      if File.exist?('.submoduler.ini')
-        # Parse .submoduler.ini to find parent path
-        config = File.read('.submoduler.ini')
-        if config =~ /path\s*=\s*(.+)/
-          @parent_path = $1.strip
-        else
-          @parent_path = '../../'
-        end
+      ini = SubmodulerCommon::SubmodulerIni.new
+      
+      if ini.exist?
+        ini.load_config
+        # Try to get path from config, otherwise default to ../../
+        @parent_path = ini.get('submoduler', 'path') || '../../'
       else
         @parent_path = '../../'
       end

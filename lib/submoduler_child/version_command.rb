@@ -110,14 +110,17 @@ module SubmodulerChild
     end
 
     def extract_gem_name
-      config = File.read('.submoduler.ini')
+      ini = SubmodulerCommon::SubmodulerIni.new
+      return 'unknown' unless ini.exist?
       
-      master = config[/master=(\w+)/, 1] || 'unknown'
-      category = config[/category=(\w+)/, 1] || 'unknown'
-      childname = config[/childname=([\w_]+)/, 1] || 'unknown'
+      ini.load_config
+      
+      master = ini.get('submoduler', 'master')&.split('/')&.last&.gsub('.git', '') || 'unknown'
+      category = ini.get('submoduler', 'category') || 'unknown'
+      childname = ini.child_name || 'unknown'
       
       "#{master}-#{category}-#{childname}"
-    rescue
+    rescue SubmodulerCommon::SubmodulerIni::ConfigError
       'unknown'
     end
 

@@ -3,22 +3,22 @@
 require 'optparse'
 
 module SubmodulerChild
-  class StatusCommand
+  class StatusCommand < SubmodulerCommon::Command
     def initialize(args)
+      super()
       @args = args
       parse_options
     end
 
     def execute
-      puts "Checking child submodule status..."
-      puts ""
+      logger.info "Checking child submodule status..."
       
       check_repository_status
       check_branch_info
       
       0
     rescue StandardError => e
-      puts "Error: #{e.message}"
+      logger.error "Error: #{e.message}"
       1
     end
 
@@ -36,15 +36,15 @@ module SubmodulerChild
     end
 
     def check_repository_status
-      puts "Repository Status:"
+      logger.info "Repository Status:"
       
-      status_output = `git status --short 2>&1`
+      status_output = SubmodulerCommon::GitHelper.run('status --short')
       
-      if $?.success?
+      if SubmodulerCommon::GitHelper.success?
         if status_output.strip.empty?
-          puts "  ✓ Working tree is clean"
+          logger.info "  ✓ Working tree is clean"
         else
-          puts "  ✗ Working tree has changes:"
+          logger.error "  ✗ Working tree has changes:"
           
           modified = []
           untracked = []
@@ -62,55 +62,55 @@ module SubmodulerChild
           end
           
           unless staged.empty?
-            puts "    Staged:"
-            staged.each { |f| puts "      #{f}" }
+            logger.info "    Staged:"
+            staged.each { |f| logger.info "      #{f}" }
           end
           
           unless modified.empty?
-            puts "    Modified:"
-            modified.each { |f| puts "      #{f}" }
+            logger.info "    Modified:"
+            modified.each { |f| logger.info "      #{f}" }
           end
           
           unless untracked.empty?
-            puts "    Untracked:"
-            untracked.each { |f| puts "      #{f}" }
+            logger.info "    Untracked:"
+            untracked.each { |f| logger.info "      #{f}" }
           end
         end
       else
-        puts "  ✗ Error checking git status"
+        logger.error "  ✗ Error checking git status"
       end
       
-      puts ""
+      logger.info ""
     end
 
     def check_branch_info
-      puts "Branch Information:"
+      logger.info "Branch Information:"
       
-      branch = `git branch --show-current 2>&1`.strip
+      branch = SubmodulerCommon::GitHelper.run('branch --show-current').strip
       
-      if $?.success? && !branch.empty?
-        puts "  Current branch: #{branch}"
+      if SubmodulerCommon::GitHelper.success? && !branch.empty?
+        logger.info "  Current branch: #{branch}"
         
         # Check if branch has remote tracking
-        remote_info = `git rev-list --left-right --count #{branch}...@{u} 2>&1`.strip
+        remote_info = SubmodulerCommon::GitHelper.run("rev-list --left-right --count #{branch}...@{u}").strip
         
-        if $?.success?
+        if SubmodulerCommon::GitHelper.success?
           ahead, behind = remote_info.split("\t").map(&:to_i)
           
           if ahead > 0 && behind > 0
-            puts "  ⚠ Branch is #{ahead} commit(s) ahead and #{behind} commit(s) behind remote"
+            logger.error "  ⚠ Branch is #{ahead} commit(s) ahead and #{behind} commit(s) behind remote"
           elsif ahead > 0
-            puts "  ↑ Branch is #{ahead} commit(s) ahead of remote"
+            logger.error "  ↑ Branch is #{ahead} commit(s) ahead of remote"
           elsif behind > 0
-            puts "  ↓ Branch is #{behind} commit(s) behind remote"
+            logger.error "  ↓ Branch is #{behind} commit(s) behind remote"
           else
-            puts "  ✓ Branch is up to date with remote"
+            logger.info "  ✓ Branch is up to date with remote"
           end
         else
-          puts "  ℹ No remote tracking branch"
+          logger.info "  ℹ No remote tracking branch"
         end
       else
-        puts "  ℹ Not on any branch (detached HEAD)"
+        logger.info "  ℹ Not on any branch (detached HEAD)"
       end
     end
   end

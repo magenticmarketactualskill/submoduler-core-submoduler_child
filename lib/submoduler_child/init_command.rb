@@ -10,7 +10,8 @@ module SubmodulerChild
     def execute
       puts "Initializing Submoduler Child..."
       
-      if File.exist?('.submoduler.ini')
+      ini = SubmodulerCommon::SubmodulerIni.new
+      if ini.exist?
         puts "Error: .submoduler.ini already exists"
         return 1
       end
