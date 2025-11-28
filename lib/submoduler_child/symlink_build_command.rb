@@ -84,14 +84,12 @@ module SubmodulerChild
         filename = File.basename(source_file)
         target = File.join(PROJECT_STEERING, filename)
         
-        # Skip if this is a symlink in parent pointing to vendor (avoid double-linking)
-        if File.symlink?(source_file)
-          # Get the real source
-          real_source = File.readlink(source_file)
-          source_relative = File.join(File.dirname(relative_prefix), real_source)
-        else
-          source_relative = File.join(relative_prefix, filename)
-        end
+        # Skip if source is a symlink (parent's .kiro/steering may have symlinks to vendor)
+        # We'll link directly from vendor directories instead
+        next if File.symlink?(source_file)
+        
+        # Source is a regular file
+        source_relative = File.join(relative_prefix, filename)
 
         if File.symlink?(target)
           @updated << filename
