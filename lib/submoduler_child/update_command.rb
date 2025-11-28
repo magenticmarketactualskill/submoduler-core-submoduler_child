@@ -26,6 +26,13 @@ module SubmodulerChild
       end
 
       bump_version
+      
+      # Commit version bump if there are changes
+      unless git_clean?
+        stage_changes
+        commit_version_bump
+      end
+      
       push_changes
       create_github_release if @options[:release]
 
@@ -75,6 +82,15 @@ module SubmodulerChild
     def commit_changes
       puts "Committing changes..."
       message = "Update #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}"
+      system("git commit -m '#{message}'")
+    end
+
+    def commit_version_bump
+      puts "Committing version bump..."
+      # Get the new version
+      require_relative 'version_command'
+      version = VersionCommand.new([]).get_current_version
+      message = "Bump version to #{version}"
       system("git commit -m '#{message}'")
     end
 

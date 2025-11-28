@@ -1,4 +1,4 @@
-# Submoduler Child
+stop# Submoduler Child
 
 Child gem for Submoduler - Git submodule management tool for managing child submodules in monorepo environments.
 
@@ -7,7 +7,7 @@ Child gem for Submoduler - Git submodule management tool for managing child subm
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'submoduler-core-submoduler_child'
+gem 'submoduler-submoduler_child'
 ```
 
 And then execute:
@@ -16,7 +16,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install submoduler-core-submoduler_child
+    $ gem install submoduler-submoduler_child
 
 ## Usage
 

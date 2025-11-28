@@ -26,6 +26,13 @@ module SubmodulerChild
       1
     end
 
+    def get_current_version
+      version_file = find_version_file
+      return "unknown" unless version_file
+      
+      extract_version(version_file)
+    end
+
     private
 
     def parse_options
